@@ -1,0 +1,17 @@
+---
+# Sample Playbook for "sh" Ansible Module
+
+- name: Test Play
+  hosts: localhost, ubuntu, controller
+  become: true
+  tasks:
+    - name: run command base of the rc of another command
+      sh:
+        cmd: 'hostname'
+        condition: 'ifconfig  | grep 192.168.122.191'
+        lang: bash
+        if_rc: 0
+      register: test_sh
+
+    - debug:
+        var: test_sh
