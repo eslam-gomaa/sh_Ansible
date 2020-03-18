@@ -8,10 +8,37 @@
     - name: run command base of the rc of another command
       sh:
         cmd: 'hostname'
-        condition: 'ifconfig  | grep 192.168.122.191'
+        condition: 'hostname'
         lang: bash
-        if_rc: 0
+        if_stdout: 'ansible'
       register: test_sh
 
     - debug:
         var: test_sh
+
+
+    - name: run command base of the rc of another command --  multi line
+      sh:
+        cmd: |
+          export pass='password'
+          export users_file=/root/users.txt
+          echo 'user-test' > $users_file
+
+              if [ -f $1 ] ; then
+                  for i in $( cat /root/users.txt ); do
+                     useradd "$i"
+                     echo "User $i created successfully"
+                     echo $pass | passwd "$i" --stdin
+                  done
+              else
+                  echo "Input is NOT a file"
+              fi
+        condition: 'cat /etc/passwd | grep user-test'
+        lang: bash
+        if_rc: 1
+      register: multi_line
+
+    - debug:
+        var: multi_line
+
+
