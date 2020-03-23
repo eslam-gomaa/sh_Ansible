@@ -5,19 +5,19 @@
   hosts: localhost, ubuntu, controller
   become: true
   tasks:
-    - name: run command base of the rc of another command
+    - name: run command basd of the "stdout" of another command
       sh:
         cmd: 'hostname'
         condition: 'hostname'
         lang: bash
-        if_stdout: 'ansible'
+        if_stdout: 'ansible1'
       register: test_sh
 
-    - debug:
-        var: test_sh
+    #- debug:
+    #    var: test_sh
 
 
-    - name: run command base of the rc of another command --  multi line
+    - name: run command based of the "rc" of another command --  multi line
       sh:
         cmd: |
           export pass='password'
@@ -38,7 +38,47 @@
         if_rc: 1
       register: multi_line
 
+    #- debug:
+    #    var: multi_line
+
+    - name: run command based on Python code
+      sh:
+        cmd: echo 'Execute some commands '
+        condition: |
+          import socket
+          sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+          result = sock.connect_ex(('127.0.0.1',22))
+          if result == 0:
+             print "open"
+          else:
+             print "not-open"
+          sock.close()
+        lang: python
+        if_stdout: 'open'
+      register: test_python
+
     - debug:
-        var: multi_line
+        var: test_python
+
+    - name: run command based on Python code 2
+      sh:
+        cmd: echo 'Execute some commands '
+        condition: |
+          import socket
+          sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+          result = sock.connect_ex(('127.0.0.1',24))
+          if result == 0:
+             print "open"
+             sock.close()
+          else:
+             print "not-open"
+             sock.close()
+             exit(1)
+        lang: python
+        if_rc: 1
+      register: test_python
+
+    - debug:
+        var: test_python
 
 
