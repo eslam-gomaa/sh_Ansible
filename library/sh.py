@@ -18,7 +18,6 @@ def runcommand(cmd):
     ## Python's rstrip() method
     # strips all kinds of trailing whitespace by default, not just one newline
     return info
-    #print(runcommand('ifconfig -a'))
 
 def run_py_code(code, python_version='python'):
     import random
@@ -26,7 +25,6 @@ def run_py_code(code, python_version='python'):
     import stat
 
     file = '/tmp/{}.py'.format(random.randint(0,1000))
-    #print(file)
     py_file = open(file,"w+")
     py_file.write('#!/usr/bin/{}\n'.format(python_version))
     py_file.write('\n')
@@ -35,9 +33,8 @@ def run_py_code(code, python_version='python'):
     os.chmod(file, stat.S_IRUSR | stat.S_IWRITE | stat.S_IEXEC | stat.S_IRGRP | stat.S_IROTH | stat.S_IXGRP | stat.S_IXOTH)
     # we need to close the file before executing the command otherwise 'runcommand' function will not execute
     py_file.close()
-    # Run the script and get the output
-    cmd = runcommand('{} {}'.format(python_version, file))
-    #os.remove(file)
+    cmd = runcommand('{} {}'.format(python_version, file)) # Run the script and get the output
+    os.remove(file) # Remove the script file
     return cmd
 
 def shell2(cmd, lang,condition=None,  if_rc=None, if_stdout=None, env=False):
@@ -159,7 +156,7 @@ def main():
                  if_stdout=module.params['if_stdout']
                  )
 
-    cmd_args = module.params['cmd'].split()
+    #cmd_args = module.params['cmd'].split()
 
     if not run['cmd'] is None:
         if run['cmd']['stderr']:
