@@ -8,13 +8,11 @@
     - name: run command basd of the "stdout" of another command
       sh:
         cmd: 'hostname'
-        condition: 'hostname'
-        lang: bash
-        if_stdout: 'ansible1'
       register: test_sh
 
-    #- debug:
-    #    var: test_sh
+
+    - debug:
+        var: test_sh
 
 
     - name: run command based of the "rc" of another command --  multi line
