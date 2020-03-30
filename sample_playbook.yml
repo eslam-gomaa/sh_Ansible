@@ -2,7 +2,7 @@
 # Sample Playbook for "sh" Ansible Module
 
 - name: Test Play
-  hosts: localhost, ubuntu, controller
+  hosts: ubuntu, centos
   become: true
   tasks:
 
