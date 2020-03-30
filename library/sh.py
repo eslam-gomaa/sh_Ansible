@@ -289,6 +289,10 @@ def shell2(cmd, lang, condition=None, if_rc=None, if_stdout=None, env=False):
                 info['condition']['if_stdout'] = if_stdout
 
     return info
+
+# lang --> bash
+#print(shell2(cmd='echo $test',condition='hostname', lang='bash', if_stdout='ansible.linux.com', if_rc= 0))
+
 ############
 #######################
 ##############################################

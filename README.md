@@ -25,7 +25,28 @@
 
 
 
-**For full example:**  
+```yaml
+- name: Name of the task
+  sh:
+    cmd: command to run
+    condition: command to run as a condition # cab be bash command or python code
+    lang: bash  # bash || Python
+    if_stdout: 'ansible'
+```
+
+
+
+```yaml
+- name: Name of the task
+  sh:
+    cmd: command to run
+    condition: | command to run as a condition # multi line
+      hostname
+      ifconfig
+      etc...
+    lang: bash  # bash || Python
+    if_rc: 0 # you can use "if_stdout" + "if_rc"
+```
 
 
 
@@ -40,10 +61,6 @@
 
 
 ## Examples
-
-
-
-**`Note`** - This code is only an example of the module function
 
 
 
