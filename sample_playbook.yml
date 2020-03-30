@@ -1,13 +1,13 @@
 ---
 # Sample Playbook for "sh" Ansible Module
 
-
-###################################### Example 1
-
 - name: Test Play
   hosts: localhost, ubuntu, controller
   become: true
   tasks:
+
+###################################### Example 1
+
     - name: run command basd of the "stdout" of another command
       sh:
         cmd: 'hostname'
