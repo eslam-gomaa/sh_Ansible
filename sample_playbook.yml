@@ -1,6 +1,9 @@
 ---
 # Sample Playbook for "sh" Ansible Module
 
+
+###################################### Example 1
+
 - name: Test Play
   hosts: localhost, ubuntu, controller
   become: true
@@ -13,6 +16,8 @@
     - debug:
         var: test_sh
 
+
+###################################### Example 2
 
     - name: run command based of the "rc" of another command --  multi line
       sh:
@@ -38,6 +43,10 @@
     - debug:
         var: multi_line
 
+
+###################################### Example 3
+
+
     - name: run command based on Python code
       sh:
         cmd: echo 'Execute some commands '
@@ -56,6 +65,10 @@
 
     - debug:
         var: test_python
+
+
+###################################### Example 4
+
 
     - name: run command based on Python code 2
       sh:
