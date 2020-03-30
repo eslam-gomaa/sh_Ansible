@@ -25,6 +25,10 @@
 
 
 
+Full example is provided in [sample_playbook.yml](https://github.com/eslam-gomaa/sh_Ansible/blob/master/sample_playbook.yml)
+
+
+
 ```yaml
 - name: Name of the task
   sh:

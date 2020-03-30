@@ -10,7 +10,6 @@
         cmd: 'hostname'
       register: test_sh
 
-
     - debug:
         var: test_sh
 
@@ -36,8 +35,8 @@
         if_rc: 1
       register: multi_line
 
-    #- debug:
-    #    var: multi_line
+    - debug:
+        var: multi_line
 
     - name: run command based on Python code
       sh:
@@ -74,9 +73,7 @@
              exit(1)
         lang: python
         if_rc: 1
-      register: test_python
+      register: test_python2
 
     - debug:
-        var: test_python
-
-
+        var: test_python2
