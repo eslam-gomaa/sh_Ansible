@@ -8,16 +8,30 @@
 
 ###################################### Example 1
 
-    - name: run command basd of the "stdout" of another command
+    - name: run command without condition
       sh:
         cmd: 'hostname'
-      register: test_sh
+      register: test_1
 
     - debug:
-        var: test_sh
+        var: test_1
 
 
 ###################################### Example 2
+
+    - name: run command basd of the "stdout" of another command
+      sh:
+        cmd: 'hostnamectl'
+        condition: 'hostname'
+        lang: bash
+        if_stdout: 'ansible'
+      register: test_2
+
+    - debug:
+        var: test_2
+
+
+###################################### Example 3
 
     - name: run command based of the "rc" of another command --  multi line
       sh:
@@ -44,7 +58,7 @@
         var: multi_line
 
 
-###################################### Example 3
+###################################### Example 4
 
 
     - name: run command based on Python code
@@ -67,7 +81,7 @@
         var: test_python
 
 
-###################################### Example 4
+###################################### Example 5
 
 
     - name: run command based on Python code 2
