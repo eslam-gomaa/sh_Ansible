@@ -155,7 +155,10 @@ condition:
 ##############################################
 #######################
 ############
+#!/usr/bin/python
+
 import re
+import operator
 
 def runcommand(cmd):
     """
@@ -168,7 +171,7 @@ def runcommand(cmd):
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE,
                             shell=True,
-                            universal_newlines=True)
+                            universal_newlines=True,)
     std_out, std_err = proc.communicate()
     info['rc'] = proc.returncode
     info['stdout'] = std_out.rstrip()
@@ -182,7 +185,7 @@ def run_py_code(code, python_version='python'):
     import os
     import stat
 
-    file = '/tmp/{}.py'.format(random.randint(0, 1000))
+    file = '/tmp/{}.py'.format(random.randint(0, 1))
     py_file = open(file, "w+")
     py_file.write('#!/usr/bin/{}\n'.format(python_version))
     py_file.write('\n')
@@ -196,7 +199,26 @@ def run_py_code(code, python_version='python'):
     os.remove(file)  # Remove the script file
     return cmd
 
-def shell2(cmd, lang, condition=None, if_rc=None, if_stdout=None, regexp= False):
+def custom_operator(value1, oper, value2):
+    operators = ['=', '!=', '>', '<', '>=', '<=']
+    if not oper in operators:
+        raise ValueError("Invalid Opeator - Supported operators are only: " + str(operators))
+    bool = None
+    if oper == '=':
+        bool = operator.eq(value1, value2)
+    elif oper == '!=':
+        bool = operator.ne(value1, value2)
+    elif oper == '>':
+        bool = operator.gt(value1, value2)
+    elif oper == '>=':
+        bool = operator.ge(value1, value2)
+    elif oper == '<':
+        bool = operator.lt(value1, value2)
+    elif oper == '<=':
+        bool = operator.le(value1, value2)
+    return bool
+
+def shell2(cmd, lang, condition=None, if_rc=None, if_stdout=None, regexp= False, if_stdout_operator='=', if_rc_operator='='):
     info = {}
     info['cmd'] = None
     info['cmd_run'] = None
@@ -217,12 +239,15 @@ def shell2(cmd, lang, condition=None, if_rc=None, if_stdout=None, regexp= False)
         if (if_rc is not None) and (if_stdout is not None):
             found = []
             if regexp:
+                if if_stdout_operator == '=':
+                    if_stdout_operator = '>'
+                elif if_stdout_operator == '!=':
+                    if_stdout_operator = '<'
                 pattern = re.compile(r"\b{}\b".format(if_stdout))
                 found = pattern.findall(b['stdout'])
-                search = (found > 0) and (b['rc'] == if_rc)
+                search = (custom_operator(found, if_stdout_operator, 0)) and (custom_operator(b['rc'], if_rc_operator, if_rc))
             else:
-                search = (b['stdout'] == if_stdout) and (b['rc'] == if_rc)
-
+                search = (custom_operator(b['stdout'], if_stdout_operator, if_stdout)) and (custom_operator(b['rc'], if_rc_operator, if_rc))
             if search:
                 c = runcommand(cmd)
                 info['cmd'] = c
@@ -241,7 +266,7 @@ def shell2(cmd, lang, condition=None, if_rc=None, if_stdout=None, regexp= False)
                 info['condition']['regexp'] = regexp
                 info['condition']['regexp_match'] = found
         elif if_rc is not None:
-            if b['rc'] == if_rc:
+            if custom_operator(b['rc'], if_rc_operator, if_rc):
                 c = runcommand(cmd)
                 info['cmd'] = c
                 info['condition']['cmd'] = b
@@ -258,11 +283,15 @@ def shell2(cmd, lang, condition=None, if_rc=None, if_stdout=None, regexp= False)
         elif if_stdout is not None:
             found = []
             if regexp:
+                if if_stdout_operator == '=':
+                    if_stdout_operator = '>'
+                elif if_stdout_operator == '!=':
+                    if_stdout_operator = '<'
                 pattern = re.compile(r"\b{}\b".format(if_stdout))
                 found = pattern.findall(b['stdout'])
-                search = (found > 0)
+                search = (custom_operator(found, if_stdout_operator, 0))
             else:
-                search = (b['stdout'] == if_stdout)
+                search = (custom_operator(b['stdout'], if_stdout_operator, if_stdout))
 
             if search:
                 c = runcommand(cmd)
@@ -284,11 +313,15 @@ def shell2(cmd, lang, condition=None, if_rc=None, if_stdout=None, regexp= False)
         if (if_rc is not None) and (if_stdout is not None):
             found = []
             if regexp:
+                if if_stdout_operator == '=':
+                    if_stdout_operator = '>'
+                elif if_stdout_operator == '!=':
+                    if_stdout_operator = '<'
                 pattern = re.compile(r"\b{}\b".format(if_stdout))
                 found = pattern.findall(b['stdout'])
-                search = (found > 0) and (b['rc'] == if_rc)
+                search = (custom_operator(found, if_stdout_operator, 0)) and (custom_operator(b['rc'], if_rc_operator, if_rc))
             else:
-                search = (b['stdout'] == if_stdout) and (b['rc'] == if_rc)
+                search = (custom_operator(b['stdout'], if_stdout_operator, if_stdout)) and (custom_operator(b['rc'], if_rc_operator, if_rc))
 
             if search:
                 c = runcommand(cmd)
@@ -307,7 +340,7 @@ def shell2(cmd, lang, condition=None, if_rc=None, if_stdout=None, regexp= False)
                 info['condition']['regexp'] = regexp
                 info['condition']['regexp_match'] = found
         elif if_rc is not None:
-            if b['rc'] == if_rc:
+            if custom_operator(b['rc'], if_rc_operator, if_rc):
                 c = runcommand(cmd)
                 info['cmd'] = c
                 info['condition']['cmd'] = b
@@ -324,11 +357,15 @@ def shell2(cmd, lang, condition=None, if_rc=None, if_stdout=None, regexp= False)
         elif if_stdout is not None:
             found = []
             if regexp:
+                if if_stdout_operator == '=':
+                    if_stdout_operator = '>'
+                elif if_stdout_operator == '!=':
+                    if_stdout_operator = '<'
                 pattern = re.compile(r"\b{}\b".format(if_stdout))
                 found = pattern.findall(b['stdout'])
-                search = (found > 0)
+                search = (custom_operator(found, if_stdout_operator, 0))
             else:
-                search = (b['stdout'] == if_stdout)
+                search = (custom_operator(b['stdout'], if_stdout_operator, if_stdout))
 
             if search:
                 c = runcommand(cmd)
@@ -348,7 +385,8 @@ def shell2(cmd, lang, condition=None, if_rc=None, if_stdout=None, regexp= False)
     return info
 
 # lang --> bash
-#print(shell2(cmd='export test=love && echo $test',condition='ifconfig pnet0', lang='bash', if_stdout='pnet[0-9]+', if_rc= 0, regexp=True))
+# print(shell2(cmd='export test=love && echo $test',condition='ifconfig pnet0', lang='bash', if_stdout='pnet[0-9]+', regexp=True, if_stdout_operator='='))
+
 
 ############
 #######################
@@ -363,7 +401,9 @@ def main():
         "lang": {"default": 'bash', "type": "str", "choices": ['bash', 'python']},
         "if_rc": {"default": None, "type": "int"},
         "if_stdout": {"default": None, "type": "str"},
-        "regexp": {"default": False, "type": "bool"}
+        "if_stdout_operator": {"default": "=", "type": "str", "choices": ['=', '!=']},
+        "if_rc_operator": {"default": "=", "type": "str", "choices": ['=', '!=', '>', '<', '>=', '<=']},
+        "regexp": {"default": False, "type": "bool"},
     }
 
     module = AnsibleModule(argument_spec=fields)
@@ -373,10 +413,18 @@ def main():
                  lang=module.params['lang'],
                  if_rc=module.params['if_rc'],
                  if_stdout=module.params['if_stdout'],
-                 regexp=module.params['regexp']
+                 regexp=module.params['regexp'],
+                 if_rc_operator=module.params['if_rc_operator'],
+                 if_stdout_operator=module.params['if_stdout_operator']
                  )
 
-    # cmd_split = module.params['cmd'].split()
+    cmd_list = ['yum', 'wget', 'apt', 'apt-get', 'aptitude' ]
+    cmd_split = module.params['cmd'].split()
+    for x in cmd_split:
+        for y in cmd_list:
+            if x == y:
+                module.warn("It's recommended to use Ansible Module for (" + x + ") instead of using explicit commands")
+
 
     if not run['cmd'] is None:
         if run['cmd']['stderr']:
