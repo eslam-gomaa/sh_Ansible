@@ -120,4 +120,3 @@
 
     - debug:
         var: test_regexp
-        

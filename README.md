@@ -91,7 +91,7 @@ Full example is provided in [sample_playbook.yml](https://github.com/eslam-gomaa
 
 * Execute shell command based on the `stdout` &  `rc` of a Python code
 
-```yml
+```yaml
 - name: run command based on Python code
   sh:
     cmd: echo 'Execute some commands '
@@ -119,5 +119,19 @@ Full example is provided in [sample_playbook.yml](https://github.com/eslam-gomaa
 
 ---
 
+* use REGEXP search as a condition to run the command
 
+```yaml
+    - name: use REGEXP search as a condition to run the command
+      sh:
+        cmd: 'hostnamectl'
+        condition: 'ifconfig -a'
+        lang: bash
+        if_stdout: 'eth[0-9]'
+        regexp: true
+      register: test_regexp
+
+    - debug:
+        var: test_regexp
+```
 
