@@ -155,8 +155,6 @@ condition:
 ##############################################
 #######################
 ############
-import re
-
 def runcommand(cmd):
     """
     function to execute shell commands and returns a dic of
@@ -177,6 +175,7 @@ def runcommand(cmd):
     # strips all kinds of trailing whitespace by default, not just one newline
     return info
 
+
 def run_py_code(code, python_version='python'):
     import random
     import os
@@ -196,7 +195,8 @@ def run_py_code(code, python_version='python'):
     os.remove(file)  # Remove the script file
     return cmd
 
-def shell2(cmd, lang, condition=None, if_rc=None, if_stdout=None, regexp= False):
+
+def shell2(cmd, lang, condition=None, if_rc=None, if_stdout=None, env=False):
     info = {}
     info['cmd'] = None
     info['cmd_run'] = None
@@ -215,31 +215,18 @@ def shell2(cmd, lang, condition=None, if_rc=None, if_stdout=None, regexp= False)
     if lang == 'bash':
         b = runcommand(condition)
         if (if_rc is not None) and (if_stdout is not None):
-            found = []
-            if regexp:
-                pattern = re.compile(r"\b{}\b".format(if_stdout))
-                found = pattern.findall(b['stdout'])
-                search = (found > 0) and (b['rc'] == if_rc)
-            else:
-                search = (b['stdout'] == if_stdout) and (b['rc'] == if_rc)
-
-            if search:
+            if (b['stdout'] == if_stdout) and (b['rc'] == if_rc):
                 c = runcommand(cmd)
                 info['cmd'] = c
                 info['condition']['cmd'] = b
                 info['cmd_run'] = 0
                 info['condition']['if_rc'] = if_rc
                 info['condition']['if_stdout'] = if_stdout
-                info['condition']['regexp'] = regexp
-                info['condition']['regexp_match'] = found
-
             else:
                 info['condition']['cmd'] = b
                 info['cmd_run'] = 1
                 info['condition']['if_stdout'] = if_stdout
                 info['condition']['if_rc'] = if_rc
-                info['condition']['regexp'] = regexp
-                info['condition']['regexp_match'] = found
         elif if_rc is not None:
             if b['rc'] == if_rc:
                 c = runcommand(cmd)
@@ -247,65 +234,37 @@ def shell2(cmd, lang, condition=None, if_rc=None, if_stdout=None, regexp= False)
                 info['condition']['cmd'] = b
                 info['cmd_run'] = 0
                 info['condition']['if_rc'] = if_rc
-                info['condition']['regexp'] = regexp
-                info['condition']['regexp_match'] = []
             else:
                 info['condition']['cmd'] = b
                 info['cmd_run'] = 1
                 info['condition']['if_rc'] = if_rc
-                info['condition']['regexp'] = regexp
-                info['condition']['regexp_match'] = []
         elif if_stdout is not None:
-            found = []
-            if regexp:
-                pattern = re.compile(r"\b{}\b".format(if_stdout))
-                found = pattern.findall(b['stdout'])
-                search = (found > 0)
-            else:
-                search = (b['stdout'] == if_stdout)
-
-            if search:
+            if b['stdout'] == if_stdout:
                 c = runcommand(cmd)
                 info['cmd'] = c
                 info['condition']['cmd'] = b
                 info['cmd_run'] = 0
                 info['condition']['if_stdout'] = if_stdout
-                info['condition']['regexp'] = regexp
-                info['condition']['regexp_match'] = found
             else:
                 info['condition']['cmd'] = b
                 info['cmd_run'] = 1
                 info['condition']['if_stdout'] = if_stdout
-                info['condition']['regexp'] = regexp
-                info['condition']['regexp_match'] = found
 
     elif lang == 'python':
         b = run_py_code(condition)
         if (if_rc is not None) and (if_stdout is not None):
-            found = []
-            if regexp:
-                pattern = re.compile(r"\b{}\b".format(if_stdout))
-                found = pattern.findall(b['stdout'])
-                search = (found > 0) and (b['rc'] == if_rc)
-            else:
-                search = (b['stdout'] == if_stdout) and (b['rc'] == if_rc)
-
-            if search:
+            if (b['stdout'] == if_stdout) and (b['rc'] == if_rc):
                 c = runcommand(cmd)
                 info['cmd'] = c
                 info['condition']['cmd'] = b
                 info['cmd_run'] = 0
                 info['condition']['if_rc'] = if_rc
                 info['condition']['if_stdout'] = if_stdout
-                info['condition']['regexp'] = regexp
-                info['condition']['regexp_match'] = found
             else:
                 info['condition']['cmd'] = b
                 info['cmd_run'] = 1
                 info['condition']['if_stdout'] = if_stdout
                 info['condition']['if_rc'] = if_rc
-                info['condition']['regexp'] = regexp
-                info['condition']['regexp_match'] = found
         elif if_rc is not None:
             if b['rc'] == if_rc:
                 c = runcommand(cmd)
@@ -313,42 +272,26 @@ def shell2(cmd, lang, condition=None, if_rc=None, if_stdout=None, regexp= False)
                 info['condition']['cmd'] = b
                 info['cmd_run'] = 0
                 info['condition']['if_rc'] = if_rc
-                info['condition']['regexp'] = regexp
-                info['condition']['regexp_match'] = []
             else:
                 info['condition']['cmd'] = b
                 info['cmd_run'] = 1
                 info['condition']['if_rc'] = if_rc
-                info['condition']['regexp'] = regexp
-                info['condition']['regexp_match'] = []
         elif if_stdout is not None:
-            found = []
-            if regexp:
-                pattern = re.compile(r"\b{}\b".format(if_stdout))
-                found = pattern.findall(b['stdout'])
-                search = (found > 0)
-            else:
-                search = (b['stdout'] == if_stdout)
-
-            if search:
+            if b['stdout'] == if_stdout:
                 c = runcommand(cmd)
                 info['cmd'] = c
                 info['condition']['cmd'] = b
                 info['cmd_run'] = 0
                 info['condition']['if_stdout'] = if_stdout
-                info['condition']['regexp'] = regexp
-                info['condition']['regexp_match'] = found
             else:
                 info['condition']['cmd'] = b
                 info['cmd_run'] = 1
                 info['condition']['if_stdout'] = if_stdout
-                info['condition']['regexp'] = regexp
-                info['condition']['regexp_match'] = found
 
     return info
 
 # lang --> bash
-#print(shell2(cmd='export test=love && echo $test',condition='ifconfig pnet0', lang='bash', if_stdout='pnet[0-9]+', if_rc= 0, regexp=True))
+#print(shell2(cmd='echo $test',condition='hostname', lang='bash', if_stdout='ansible.linux.com', if_rc= 0))
 
 ############
 #######################
@@ -363,7 +306,6 @@ def main():
         "lang": {"default": 'bash', "type": "str", "choices": ['bash', 'python']},
         "if_rc": {"default": None, "type": "int"},
         "if_stdout": {"default": None, "type": "str"},
-        "regexp": {"default": False, "type": "bool"}
     }
 
     module = AnsibleModule(argument_spec=fields)
@@ -372,8 +314,7 @@ def main():
                  condition=module.params['condition'],
                  lang=module.params['lang'],
                  if_rc=module.params['if_rc'],
-                 if_stdout=module.params['if_stdout'],
-                 regexp=module.params['regexp']
+                 if_stdout=module.params['if_stdout']
                  )
 
     # cmd_split = module.params['cmd'].split()

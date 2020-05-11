@@ -2,7 +2,7 @@
 # Sample Playbook for "sh" Ansible Module
 
 - name: Test Play
-  hosts: ubuntu, centos
+  hosts: ubuntu, centos, controller
   become: true
   tasks:
 
@@ -104,3 +104,20 @@
 
     - debug:
         var: test_python2
+
+
+###################################### Example 6
+
+
+    - name: use REGEXP search as a condition to run the command
+      sh:
+        cmd: 'hostnamectl'
+        condition: 'ifconfig -a'
+        lang: bash
+        if_stdout: 'eth[0-9]'
+        regexp: true
+      register: test_regexp
+
+    - debug:
+        var: test_regexp
+        
