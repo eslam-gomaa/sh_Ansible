@@ -7,11 +7,11 @@ DOCUMENTATION = '''
 ---
 module: sh
 short_description: Run your shell commands in an idempotent way
-version_added: "1.0"
+version_added: "1.1"
 description:
     - Run your sell commands based on the output of another 'shell commands' or 'python code'
-        - If the condition not met, the command will not run and will be not marked as 'changed'
-        - the condition can be rc OR stdout OR (rc+stdout)
+        - If the condition not met, the command will not run and will not be marked as 'changed'
+        - the condition can be rc OR stdout OR (rc + stdout)
 
 options:
     cmd:
@@ -29,7 +29,7 @@ options:
 
     lang:
         description:
-            - the language of the condition command/code
+            - the language of the condition command/code, options: ['bash', 'python']
         required: false
         default: bash
         type: str
@@ -41,12 +41,33 @@ options:
         default: None
         type: int
 
+    if_rc_operator:
+        description:
+            - user defined operator, Options: ['=', '!=', '>', '<', '>=', '<=']
+        required: false
+        default: '='
+        type: str
+
     if_stdout:
         description:
             - RUN THE COMMAND -> if the 'if_stdout' of the condition command/code matches the provided value
         required: false
         default: None
-        type: str    
+        type: str
+
+    if_rc_operator:
+        description:
+            - user defined operator, Options: ['=', '!=']
+        required: false
+        default: '='
+        type: str
+
+    regexp:
+        description:
+            - If true, will search the stdout of the command with REGEXP provided in (if_stdout)
+        required: false
+        default: false
+        type: bool
 
 author:
     - eslam.gomaa (linkedin.com/in/eslam-gomaa)
@@ -147,15 +168,29 @@ cmd_run:
 condition:
     description: output of the condition command/code
     type: dict
-    returned: If the condition command did run    
-                 
-'''
+    returned: If the condition command did run
+    
+lang:
+    description: output the condition lang specified
+    type: str
+    returned: 'bash' OR 'python'
+    
+regexp:
+    description: If RexgExp search enabled or not
+    type: bool
+    returned: true OR false
 
+regexp_match:
+    description: If RexgExp search enabled or not
+    type: list
+    returned: List of RegExp matches from
+
+'''
 
 ##############################################
 #######################
 ############
-#!/usr/bin/python
+# !/usr/bin/python
 
 import re
 import operator
@@ -171,7 +206,7 @@ def runcommand(cmd):
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE,
                             shell=True,
-                            universal_newlines=True,)
+                            universal_newlines=True, )
     std_out, std_err = proc.communicate()
     info['rc'] = proc.returncode
     info['stdout'] = std_out.rstrip()
@@ -179,6 +214,7 @@ def runcommand(cmd):
     ## Python's rstrip() method
     # strips all kinds of trailing whitespace by default, not just one newline
     return info
+
 
 def run_py_code(code, python_version='python'):
     import random
@@ -199,6 +235,7 @@ def run_py_code(code, python_version='python'):
     os.remove(file)  # Remove the script file
     return cmd
 
+
 def custom_operator(value1, oper, value2):
     operators = ['=', '!=', '>', '<', '>=', '<=']
     if not oper in operators:
@@ -218,7 +255,9 @@ def custom_operator(value1, oper, value2):
         bool = operator.le(value1, value2)
     return bool
 
-def shell2(cmd, lang, condition=None, if_rc=None, if_stdout=None, regexp= False, if_stdout_operator='=', if_rc_operator='='):
+
+def shell2(cmd, lang, condition=None, if_rc=None, if_stdout=None, regexp=False, if_stdout_operator='=',
+           if_rc_operator='='):
     info = {}
     info['cmd'] = None
     info['cmd_run'] = None
@@ -226,7 +265,9 @@ def shell2(cmd, lang, condition=None, if_rc=None, if_stdout=None, regexp= False,
     info['condition']['lang'] = lang
     info['condition']['cmd'] = condition
     info['condition']['if_rc'] = if_rc
+    info['condition']['if_rc_operator'] = if_rc_operator
     info['condition']['if_stdout'] = if_stdout
+    info['condition']['if_stdout_operator'] = if_stdout_operator
 
     if condition is None:
         c = runcommand(cmd)
@@ -245,9 +286,11 @@ def shell2(cmd, lang, condition=None, if_rc=None, if_stdout=None, regexp= False,
                     if_stdout_operator = '<'
                 pattern = re.compile(r"\b{}\b".format(if_stdout))
                 found = pattern.findall(b['stdout'])
-                search = (custom_operator(found, if_stdout_operator, 0)) and (custom_operator(b['rc'], if_rc_operator, if_rc))
+                search = (custom_operator(found, if_stdout_operator, 0)) and (
+                    custom_operator(b['rc'], if_rc_operator, if_rc))
             else:
-                search = (custom_operator(b['stdout'], if_stdout_operator, if_stdout)) and (custom_operator(b['rc'], if_rc_operator, if_rc))
+                search = (custom_operator(b['stdout'], if_stdout_operator, if_stdout)) and (
+                    custom_operator(b['rc'], if_rc_operator, if_rc))
             if search:
                 c = runcommand(cmd)
                 info['cmd'] = c
@@ -319,9 +362,11 @@ def shell2(cmd, lang, condition=None, if_rc=None, if_stdout=None, regexp= False,
                     if_stdout_operator = '<'
                 pattern = re.compile(r"\b{}\b".format(if_stdout))
                 found = pattern.findall(b['stdout'])
-                search = (custom_operator(found, if_stdout_operator, 0)) and (custom_operator(b['rc'], if_rc_operator, if_rc))
+                search = (custom_operator(found, if_stdout_operator, 0)) and (
+                    custom_operator(b['rc'], if_rc_operator, if_rc))
             else:
-                search = (custom_operator(b['stdout'], if_stdout_operator, if_stdout)) and (custom_operator(b['rc'], if_rc_operator, if_rc))
+                search = (custom_operator(b['stdout'], if_stdout_operator, if_stdout)) and (
+                    custom_operator(b['rc'], if_rc_operator, if_rc))
 
             if search:
                 c = runcommand(cmd)
@@ -384,6 +429,7 @@ def shell2(cmd, lang, condition=None, if_rc=None, if_stdout=None, regexp= False,
 
     return info
 
+
 # lang --> bash
 # print(shell2(cmd='export test=love && echo $test',condition='ifconfig pnet0', lang='bash', if_stdout='pnet[0-9]+', regexp=True, if_stdout_operator='='))
 
@@ -393,6 +439,7 @@ def shell2(cmd, lang, condition=None, if_rc=None, if_stdout=None, regexp= False,
 ##############################################
 
 from ansible.module_utils.basic import *
+
 
 def main():
     fields = {
@@ -418,13 +465,12 @@ def main():
                  if_stdout_operator=module.params['if_stdout_operator']
                  )
 
-    cmd_list = ['yum', 'wget', 'apt', 'apt-get', 'aptitude' ]
+    cmd_list = ['yum', 'wget', 'apt', 'apt-get', 'aptitude']
     cmd_split = module.params['cmd'].split()
     for x in cmd_split:
         for y in cmd_list:
             if x == y:
                 module.warn("It's recommended to use Ansible Module for (" + x + ") instead of using explicit commands")
-
 
     if not run['cmd'] is None:
         if run['cmd']['stderr']:

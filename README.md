@@ -32,27 +32,13 @@ Full example is provided in [sample_playbook.yml](https://github.com/eslam-gomaa
 ```yaml
 - name: Name of the task
   sh:
-    cmd: command to run
-    condition: command to run as a condition # cab be bash command or python code
+    cmd: #command to run
+    condition: # command to run as a condition (can be bash command or python code)
     lang: bash  # bash || Python
-    if_stdout: 'ansible'
+    if_stdout: # If condition-command-stdout
 ```
 
-
-
-```yaml
-- name: Name of the task
-  sh:
-    cmd: command to run
-    condition: | command to run as a condition # multi line
-      hostname
-      ifconfig
-      etc...
-    lang: bash  # bash || Python
-    if_rc: 0 # you can use "if_stdout" + "if_rc"
-```
-
-
+`
 
 | :Param      | :Description                               | :Default | :Type   | :Options     |
 | ----------- | :----------------------------------------- | -------- | ------- | ------------ |
@@ -60,9 +46,10 @@ Full example is provided in [sample_playbook.yml](https://github.com/eslam-gomaa
 | `condition` | command/script to be executed as condition | None     | String  |              |
 | `lang`      | the condition command/script language      | bash     | String  | bash, python |
 | `if_rc`     | the `rc` of the `condition cmd`            | None     | Integer |              |
+| `if_rc_operator` | operator for `if_rc`                  | `=`      | String  | `['=', '!=', '>', '<', '>=', '<=']` |
 | `if_stdout` | the `stdout` of the `condition cmd`        | None     | String  |              |
-
-
+| `if_stdout_operator` | operator for `if_stdout`          | `=`       | String | `['=', '!=']`|
+| `regexp` | whether to use RegExp search towards `condition-command-stdout` | false | Bool | true, false |
 
 ## Examples
 
@@ -119,19 +106,11 @@ Full example is provided in [sample_playbook.yml](https://github.com/eslam-gomaa
 
 ---
 
-* use REGEXP search as a condition to run the command
 
-```yaml
-    - name: use REGEXP search as a condition to run the command
-      sh:
-        cmd: 'hostnamectl'
-        condition: 'ifconfig -a'
-        lang: bash
-        if_stdout: 'eth[0-9]'
-        regexp: true
-      register: test_regexp
+### RegEXP & user-defined operators are now supported
 
-    - debug:
-        var: test_regexp
-```
+Example: [advanced_example.yml](./advanced_example.yml)
 
+![](https://i.imgur.com/HjmTJS2.png)
+
+![](https://i.imgur.com/blgmT32.png)

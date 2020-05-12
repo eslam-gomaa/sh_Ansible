@@ -8,13 +8,13 @@
 
 ###################################### Example 1
 
-    - name: run command without condition
+    - name: normal # Execute the command without condition
       sh:
         cmd: 'hostname'
-      register: test_1
+      register: debug
 
     - debug:
-        var: test_1
+        var: debug
 
 
 ###################################### Example 2
@@ -25,15 +25,15 @@
         condition: 'hostname'
         lang: bash
         if_stdout: 'ansible'
-      register: test_2
+      register: debug
 
     - debug:
-        var: test_2
+        var: debug
 
 
 ###################################### Example 3
 
-    - name: run command based of the "rc" of another command --  multi line
+    - name: run command based of the "rc" of another command #  multi line
       sh:
         cmd: |
           export pass='password'
@@ -61,7 +61,7 @@
 ###################################### Example 4
 
 
-    - name: run command based on Python code
+    - name: run command based on Python code # if condition-command-stdout = 'open'
       sh:
         cmd: echo 'Execute some commands '
         condition: |
@@ -84,7 +84,7 @@
 ###################################### Example 5
 
 
-    - name: run command based on Python code 2
+    - name: run command based on Python code 2 # if condition-command-rc = 1
       sh:
         cmd: echo 'Execute some commands '
         condition: |
@@ -104,19 +104,3 @@
 
     - debug:
         var: test_python2
-
-
-###################################### Example 6
-
-
-    - name: use REGEXP search as a condition to run the command
-      sh:
-        cmd: 'hostnamectl'
-        condition: 'ifconfig -a'
-        lang: bash
-        if_stdout: 'eth[0-9]'
-        regexp: true
-      register: test_regexp
-
-    - debug:
-        var: test_regexp
