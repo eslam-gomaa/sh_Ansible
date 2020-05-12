@@ -8,16 +8,16 @@
 
 ###################################### Example 1
 
-    - name: Testing RegExp search with operators # if condition-cmd-stdout = RegExp(eth[0-9]) AND condition-cmd-rc = 0
+    - name: Testing RegExp search with operators # if condition-cmd-stdout = RegExp-match-of /eth[0-9]/ AND condition-cmd-rc > 0
       sh:
         cmd: 'echo "Execute some commands"'
         condition: 'ifconfig -a'
         lang: bash
         regexp: True
         if_stdout: 'eth[0-9]'
-        if_stdout_operator: '=' # "=" must be in quotes
+        if_stdout_operator: '='   # "=" must be in quotes
         if_rc: 0
-        if_rc_operator: '='
+        if_rc_operator: '>'
       register: debug
 
     - debug:
@@ -32,7 +32,7 @@
         condition: 'ifconfig -a'
         lang: bash
         if_rc: 1
-        if_rc_operator: <
+        if_rc_operator: '<'
       register: debug
 
     - debug:
