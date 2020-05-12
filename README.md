@@ -111,6 +111,6 @@ Full example is provided in [sample_playbook.yml](https://github.com/eslam-gomaa
 
 Example: [advanced_example.yml](./advanced_example.yml)
 
-![](https://i.imgur.com/HjmTJS2.png)
+![](https://i.imgur.com/mf8w823.png)
 
 ![](https://i.imgur.com/blgmT32.png)
