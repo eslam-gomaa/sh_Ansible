@@ -283,10 +283,10 @@ def shell2(cmd, lang, condition=None, if_rc=None, if_stdout=None, regexp=False, 
                 if if_stdout_operator == '=':
                     if_stdout_operator = '>'
                 elif if_stdout_operator == '!=':
-                    if_stdout_operator = '<'
+                    if_stdout_operator = '<='
                 pattern = re.compile(r"\b{}\b".format(if_stdout))
                 found = pattern.findall(b['stdout'])
-                search = (custom_operator(found, if_stdout_operator, 0)) and (
+                search = (custom_operator(len(found), if_stdout_operator, 0)) and (
                     custom_operator(b['rc'], if_rc_operator, if_rc))
             else:
                 search = (custom_operator(b['stdout'], if_stdout_operator, if_stdout)) and (
@@ -329,10 +329,10 @@ def shell2(cmd, lang, condition=None, if_rc=None, if_stdout=None, regexp=False, 
                 if if_stdout_operator == '=':
                     if_stdout_operator = '>'
                 elif if_stdout_operator == '!=':
-                    if_stdout_operator = '<'
+                    if_stdout_operator = '<='
                 pattern = re.compile(r"\b{}\b".format(if_stdout))
                 found = pattern.findall(b['stdout'])
-                search = (custom_operator(found, if_stdout_operator, 0))
+                search = (custom_operator(len(found), if_stdout_operator, 0))
             else:
                 search = (custom_operator(b['stdout'], if_stdout_operator, if_stdout))
 
